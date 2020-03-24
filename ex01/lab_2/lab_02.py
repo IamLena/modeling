@@ -24,8 +24,10 @@ mtable = [0.4, 0.55, 1.7, 3, 11, 32, 40, 41, 39]
 Ttable = [4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000]
 sigmatable = [0.031, 0.27, 2.05, 6.06, 12.0, 19.9, 29.6, 41.1, 54.1, 67.7, 81.5]
 
-Ivalues = []
-Uvalues = []
+Ivalues1 = []
+Uvalues1 = []
+Ivalues2 = []
+Uvalues2 = []
 Rpvalues = []
 tvalues = []
 
@@ -142,41 +144,72 @@ def rungekutta2U(U, I):
     step2 = step / 2 / alpha
     return U + step * ((1 - alpha) * funcU(I) + alpha * funcU(I + step2))
 
-# def runge_kutta_fourth(x, h, func):
-#     y = 0
-#     t = 0
+def rungekutta4(U, I):
+    k1 = step * funcI(U, I)
+    q1 = step * funcU(I)
 
-#     while t <= x:
-#         k1 = func(t, y)
-#         k2 = func(t + h / 2, y + h / 2 * k1)
-#         k3 = func(t + h / 2, y + h / 2 * k2)
-#         k4 = func(t + h, y + h * k3)
+    k2 = step * funcI(U + q1 / 2, I + k1 / 2)
+    q2 = step * funcU(I + k1 / 2)
 
-#         f = h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+    k3 = step * funcI(U + q2 / 2, I + k2 / 2)
+    q3 = step * funcU(I + k2 / 2)
 
-#         y += f
-#         t += h
+    k4 = step * funcI(U + q3, I + k3)
+    q4 = step * funcU(I + k3)
 
-#     return y
+    I += (k1 + k2 + k3 + k4) / 6
+    U += (q1 + q2 + q3 + q4) / 6
+
+    return I, U
+
+def runge_kutta_fourth(x, h, func):
+    y = 0
+    t = 0
+    while t <= x:
+        k1 = func(t, y)
+        k2 = func(t + h / 2, y + h / 2 * k1)
+        k3 = func(t + h / 2, y + h / 2 * k2)
+        k4 = func(t + h, y + h * k3)
+
+        f = h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+
+        y += f
+        t += h
+
+    return y
 
 def getvalues():
     global I0, U0
-    global Ivalues, Uvalues, Rpvalues, tvalues
+    global Ivalues1, Uvalues1, Ivalues2, Uvalues2, Rpvalues, tvalues
 
     t = 0
+    I01 = I0
+    I02 = I0
+    U01 = U0
+    U02 = U0
     while (t < tmax):
     # while (t < 0.000002):
         tvalues.append(t)
-        Ivalues.append(I0)
-        Uvalues.append(U0)
-        newI = rungekutta2I(U0, I0)
-        U0 = rungekutta2U(U0, I0)
-        I0 = newI
+        Ivalues1.append(I01)
+        Uvalues1.append(U01)
+        Ivalues2.append(I02)
+        Uvalues2.append(U02)
+        newI1 = rungekutta2I(U01, I01)
+        newU1 = rungekutta2U(U01, I01)
+        I01 = newI1
+        U01 = newU1
+
+        newI2, newU2 = rungekutta4(U02, I02)
+        I02 = newI2
+        U02 = newU2
+    
         t += step
 
-    print (Ivalues)
-    print (Uvalues)
-    print (Rpvalues)
-    print (tvalues)
+    print ("Ivalues1: ", Ivalues1)
+    print ("Uvalues1: ", Uvalues1)
+    print ("Ivalues2: ", Ivalues2)
+    print ("Uvalues2: ", Uvalues2)
+    print ("Rpvalues: ", Rpvalues)
+    print ("tvalues: ", tvalues)
 
 getvalues()
